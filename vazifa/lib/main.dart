@@ -1,9 +1,12 @@
-import 'package:dars_9/services/local_notifications_service.dart';
+import 'package:dars_9/services/local_notification_services.dart';
+import 'package:dars_9/views/screens/home_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await LocalNotificationsService.requestPermission();
+  Firebase.initializeApp();
+  await LocalNotificationServices.start();
   runApp(const MyApp());
 }
 
@@ -15,37 +18,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () async {
+      if (!LocalNotificationServices.notificationsEnabled) {
+        await LocalNotificationServices.requestPermission();
+        setState(() {});
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Home Page",
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (!LocalNotificationsService.notificationsEnable)
-            const Text("aaaaaaaaaaaaaa"),
-          TextButton(
-              onPressed: () {
-                LocalNotificationsService.showNotification();
-              },
-              child: const Text("push")),
-          TextButton(
-              onPressed: () {
-                LocalNotificationsService.showScheduledNotification();
-              },
-              child: const Text("push")),
-          TextButton(onPressed: () {}, child: const Text("push")),
-        ],
-      )),
-    ));
+    return  MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(),
+    );
   }
 }
